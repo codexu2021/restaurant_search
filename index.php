@@ -6,10 +6,7 @@
   if(isset($_POST["search_condition"]))
   {
   $search_condition = $_POST["search_condition"];
-  if ($search_condition == NULL){
-    echo "検索条件を入力してね";
-  }
-  else
+  if (!$search_condition == NULL)
   {
   $search_list = $API->set_data($search_condition);
   $search_url = $API->create_url($search_list);
@@ -59,7 +56,7 @@
     </nav>
   </header>
 
-  <div class="main-contents">
+  <div class="main-contents my-3">
     <div class="search-area form-control form-group mx-5 container">
       <!-- 送信フォーム 送信後に値を保持する処理と最初のアクセス時の値の有無の判定-->
       <form action="index.php" method="post">
@@ -67,11 +64,12 @@
         value="<?php if( !empty($search_condition["keyword="]) ){ echo $search_condition["keyword="]; } ?>">
         <br>
         <input class="form-control" type="text" name="search_condition[lat=]" id="lat" placeholder="緯度:" 
-        value="<?php if( !empty($search_condition["lat="]) ){ echo $search_condition["lat="]; } ?>">
+        value="<?php if( !empty($search_condition["lat="]) ){ echo $search_condition["lat="]; } ?>" readonly>
         <input class="form-control" type="text" name="search_condition[lng=]" id="lng" placeholder="経度:"
-        value="<?php if( !empty($search_condition["lng="]) ){ echo $search_condition["lng="]; } ?>">
-        <button class = "btn btn-outline-success"type="button"  onclick="getLocation()">自動場所検索</button>
-        <br>
+        value="<?php if( !empty($search_condition["lng="]) ){ echo $search_condition["lng="]; } ?>" readonly>
+        <div class="text-center my-3">
+          <button class = "btn btn-outline-success"type="button"  onclick="getLocation()">自動場所検索</button>
+        </div>
         <select class="form-select" name="search_condition[range=]" id="range" >
           <option value ="1" <?php if(!empty($search_list['range=']) && $search_list['range=']==1) echo"selected"?>>300m以内</option>
           <option value ="2" <?php if(!empty($search_list['range=']) && $search_list['range=']==2) echo"selected"?>>500m以内</option>
@@ -100,8 +98,9 @@
 
     </div>
     <!-- 表示一覧 -->
-    <div class="info-area container">
+    <div class="info-area container mx-5">
     <?php if (isset($res["results"]["shop"]) ) : ?>
+      <p>検索結果:<?php echo $res["results"]["results_returned"]?> 件</p>
     <?php foreach($res["results"]["shop"] as $key => $info) :?>
       <br>
     <div class="row store-content">

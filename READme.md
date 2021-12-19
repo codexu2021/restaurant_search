@@ -1,10 +1,11 @@
 # HotPepperSearch
 ホットペッパーAPIを利用した飲食店検索サイト
-テスト環境はMAMP
-PHP ver8.0
+- テスト環境 MAMP
+- PHP ver8.0
+- URL https://hotpepper-website.herokuapp.com/
 
 利用したパッケージ
-- https://github.com/superRaytin/paginationjs(ページ送り)
+- https://github.com/superRaytin/paginationjs (ページ送り)
 - bootstrap5.0
 - ホットペッパーAPI
 
@@ -22,4 +23,9 @@ APIリクエスト送信用URLの作成関数。
 ## get_data()
 URLでリクエストを送る。
 返り値はjson形式。
+
+## 処理について
+
+
+
 
