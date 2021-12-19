@@ -14,6 +14,7 @@
   ?>
   <title>Document</title>
   <?php require('HotPepperAPIclass.php'); ?>
+  <!-- ストアIDによるデータの取得 -->
   <?php if(isset($_GET['id'])) { $store_id = $_GET['id']; } ?>
   <?php 
     $store_detail = new HotPepperAPI;
