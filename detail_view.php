@@ -1,3 +1,19 @@
+<?php require('shopModel.php'); ?>
+<?php require_once('controller.php'); ?>
+  <!-- ストアIDによるデータの取得 -->
+  <?php if(isset($_GET['id'])) 
+  {
+    $objShopDetail = new shopModel;
+    $arrStoreId = $_GET['id']; 
+    $arrStoreId = array(
+      "id=" => $arrStoreId
+    );
+    $res = API_controller($arrStoreId, $objShopDetail);
+    $arrShops = $res[0][0];
+    $checkbox_data = $res[2];
+
+  } ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,17 +29,10 @@
   EOM;
   ?>
   <title>Document</title>
-  <?php require('HotPepperAPIclass.php'); ?>
-  <!-- ストアIDによるデータの取得 -->
-  <?php if(isset($_GET['id'])) { $store_id = $_GET['id']; } ?>
-  <?php 
-    $store_detail = new HotPepperAPI;
-    $res = $store_detail->get_data_by_id($store_id);
-    $store_info = $res["results"]["shop"]["0"];
-  ?>
 </head>
 <body>
-<header>
+
+<header class = "fixed-top ">
   <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <div class="container-fluid">
       <a class="navbar-brand" href="index.php">ここ食べ!</a>
@@ -46,30 +55,28 @@
   </nav>
   </header>
 
-  <div class="flex-d container">
-  <div class="row">
+  <div class="flex-d container mt-5 pt-5">
+    <div class="row">
       <div class="col">
-          <img src="<?php echo $store_info["photo"]["pc"]["l"];?>" alt = "NO IMAGE" class="img-main"></a>
+        <img src="<?php echo $arrShops["photo"];?>" alt = "NO IMAGE" class="img-main"></a>
       </div>
-      <div class="col d-flex align-items-center">
+      <div class="col d-flex align-items-center store-content">
         <ul class="store-info list-group">
-          <h1><?php echo $store_info["name"]; echo "<br>" . $store_info["name_kana"] ?></h1>
-          <p>アクセス:<br><?php echo $store_info["access"]?></p>
-          <p>営業時間:<br><?php echo $store_info["open"]; ?></p>
-          <p>住所:<br><?php echo $store_info["address"];?></p>
-          <a href=<?php echo $store_info["urls"]["pc"];?>>ホットペッパーでみる</a>
+          <h1><?php echo $arrShops["name"]; echo "<br>" . $arrShops["name_kana"] ?></h1>
+          <p>アクセス:<br><?php echo $arrShops["access"]?></p>
+          <p>営業時間:<br><?php echo $arrShops["open"]; ?></p>
+          <p>住所:<br><?php echo $arrShops["address"];?></p>
+          <a href=<?php echo $arrShops["url"];?>>ホットペッパーでみる</a>
           <br>
           <p>詳細情報</p>
           <ul>
-            <?php foreach($store_detail->get_checkbox_list() as $key=>$value) :?>
-              <!-- 文字整形の処理  --> 
-            <?php $key = str_replace('=', '', $key);?>
-            <?php if(!empty($store_info[$key])):?>
-            <li><?php echo  $value . " " . $store_info[$key] ?></li>
-            <?php endif;?>
+            <!-- 文字整形の処理  --> 
+            <?php foreach($checkbox_data as $key=>$value) :?>
+            <li><?php echo  $value ?></li>
             <?php endforeach; ?>
           </ul>
-        </div>
+        </ul>
+      </div>
     </div>
   </div>
   <?php

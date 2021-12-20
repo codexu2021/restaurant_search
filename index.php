@@ -1,18 +1,16 @@
 <!-- 2021 12/12 金岡雄一郎 作成 -->
-<?php require('HotPepperAPIclass.php'); ?>
-  <?php $res["result"]["shop"] = FALSE ?>
-  <?php // HotPepperAPI インスタンスの生成
-  $API = new HotPepperAPI;
-  if(isset($_POST["search_condition"]))
+<?php require_once('shopModel.php'); ?>
+<?php require_once('controller.php'); ?>
+  <?php // モデルの読み込み
+  $objShop = new shopModel;
+  if(isset($_POST["arrSearchCondition"]))
   {
-  $search_condition = $_POST["search_condition"];
-  if (!$search_condition == NULL)
-  {
-  $search_list = $API->set_data($search_condition);
-  $search_url = $API->create_url($search_list);
-  $res = $API->get_data($search_url);
+  $arrSearchCondition = $_POST["arrSearchCondition"];
+  $res = API_controller($arrSearchCondition, $objShop);
+  $arrShops = $res[0];
+  $strShopTotal = $res[1];
   }
-}
+
 ?>
 
 
@@ -37,10 +35,10 @@
 </head>
 
 <body>
-  <header>
+  <header> <!--class = "fixed-top"-->
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
       <div class="container-fluid">
-        <a class="navbar-brand" href="index.php">ここ食べ!</a>
+        <a class="navbar-brand" href="index.php">RestaurantSearchWEB</a>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
           <ul class="navbar-nav me-auto mb-2 mb-lg-0">
             <li class="nav-item">
@@ -48,7 +46,7 @@
             </li>  
           </ul>
           <form class="d-flex" action="index.php" method="post">
-            <input class="form-control me-2" type="search" name="search_condition[keyword=]" placeholder="Search" aria-label="Search" value="<?php if( !empty($search_condition["keyword="]) ){ echo $search_condition["keyword="]; } ?>">
+            <input class="form-control me-2" type="search" name="arrSearchCondition[keyword=]" placeholder="Search" aria-label="Search" value="<?php if( !empty($arrSearchCondition["keyword="]) ){ echo $arrSearchCondition["keyword="]; } ?>">
             <button class="btn btn-outline-success" type = "submit">Search</button>
           </form>
         </div>
@@ -56,33 +54,33 @@
     </nav>
   </header>
 
-  <div class="main-contents my-3">
+  <div class="main-contents my-3 pt-5">
     <div class="search-area form-control form-group mx-5 container">
       <!-- 送信フォーム 送信後に値を保持する処理と最初のアクセス時の値の有無の判定-->
       <form action="index.php" method="post">
-        <input class="form-control"type="search" name="search_condition[keyword=]" placeholder="キーワード検索" id = "keyword"
-        value="<?php if( !empty($search_condition["keyword="]) ){ echo $search_condition["keyword="]; } ?>">
+        <input class="form-control"type="search" name="arrSearchCondition[keyword=]" placeholder="キーワード検索" id = "keyword"
+        value="<?php if( !empty($arrSearchCondition["keyword="]) ){ echo $arrSearchCondition["keyword="]; } ?>">
         <br>
-        <input class="form-control" type="text" name="search_condition[lat=]" id="lat" placeholder="緯度:" 
-        value="<?php if( !empty($search_condition["lat="]) ){ echo $search_condition["lat="]; } ?>" readonly>
-        <input class="form-control" type="text" name="search_condition[lng=]" id="lng" placeholder="経度:"
-        value="<?php if( !empty($search_condition["lng="]) ){ echo $search_condition["lng="]; } ?>" readonly>
+        <input class="form-control" type="text" name="arrSearchCondition[lat=]" id="lat" placeholder="緯度:" 
+        value="<?php if( !empty($arrSearchCondition["lat="]) ){ echo $arrSearchCondition["lat="]; } ?>" readonly>
+        <input class="form-control" type="text" name="arrSearchCondition[lng=]" id="lng" placeholder="経度:"
+        value="<?php if( !empty($arrSearchCondition["lng="]) ){ echo $arrSearchCondition["lng="]; } ?>" readonly>
         <div class="text-center my-3">
           <button class = "btn btn-outline-success"type="button"  onclick="getLocation()">自動場所検索</button>
         </div>
-        <select class="form-select" name="search_condition[range=]" id="range" >
-          <option value ="1" <?php if(!empty($search_list['range=']) && $search_list['range=']==1) echo"selected"?>>300m以内</option>
-          <option value ="2" <?php if(!empty($search_list['range=']) && $search_list['range=']==2) echo"selected"?>>500m以内</option>
-          <option value ="3" <?php if(!empty($search_list['range=']) && $search_list['range=']==3) echo"selected"?>>1000m以内</option>
-          <option value ="4" <?php if(!empty($search_list['range=']) && $search_list['range=']==4) echo"selected"?>>2000m以内</option>
-          <option value ="5" <?php if(!empty($search_list['range=']) && $search_list['range=']==5) echo"selected"?>>3000m以内</option>
+        <select class="form-select" name="arrSearchCondition[range=]" id="range" >
+          <option value ="1" <?php if(!empty($arrSearchCondition['range=']) && $arrSearchCondition['range=']==1) echo"selected"?>>300m以内</option>
+          <option value ="2" <?php if(!empty($arrSearchCondition['range=']) && $arrSearchCondition['range=']==2) echo"selected"?>>500m以内</option>
+          <option value ="3" <?php if(!empty($arrSearchCondition['range=']) && $arrSearchCondition['range=']==3) echo"selected"?>>1000m以内</option>
+          <option value ="4" <?php if(!empty($arrSearchCondition['range=']) && $arrSearchCondition['range=']==4) echo"selected"?>>2000m以内</option>
+          <option value ="5" <?php if(!empty($arrSearchCondition['range=']) && $arrSearchCondition['range=']==5) echo"selected"?>>3000m以内</option>
         </select>
         <br>
         <div class="checkbox_list d-flex flex-column flex-wrap">
-        <?php foreach($API->get_checkbox_list() as $key=>$value) :?>  
+        <?php foreach($objShop->get_checkbox_list() as $key=>$value) :?>  
           <div>
             <fieldset>
-              <input type='checkbox'<?php echo "name='search_condition[$key]' id='$key'"?> value='1'<?php if (!empty($search_condition[$key])) echo "checked"?>> 
+              <input type='checkbox'<?php echo "name='arrSearchCondition[$key]' id='$key'"?> value='1'<?php if (!empty($arrSearchCondition[$key])) echo "checked"?>> 
               <?php echo "<label for='$key'>".$value."</label>"; ?>    
             </fieldset>
           </div>
@@ -94,38 +92,39 @@
         </div>
       </form>
       <p id = "err"></p>
-
-
     </div>
+
     <!-- 表示一覧 -->
     <div class="info-area container mx-5">
-    <?php if (isset($res["results"]["shop"]) ) : ?>
-      <p>検索結果:<?php echo $res["results"]["results_returned"]?> 件</p>
-    <?php foreach($res["results"]["shop"] as $key => $info) :?>
+    <?php if(isset($arrShops) && !is_string($arrShops) ) : ?>
+      <p>検索結果:<?php echo $strShopTotal?> 件</p>
+    <?php foreach($arrShops as $arrShop ) :?>
       <br>
     <div class="row store-content">
       <div class="col">
-      <img src="<?php echo $info["photo"]["pc"]["l"];?>" alt = "NO IMAGE" class="img-fluid"></a>
+      <img src="<?php echo $arrShop['photo'];?>" alt = "NO IMAGE" class="img-fluid"></a>
         </div>
       <div class="col d-flex align-items-center">
-      <ul class="store-info list-group">
-          <a href=<?php echo ("./detail_screen.php?id=$info[id]");?>><?php echo $info["name"];?></a>
-          <a href=<?php echo $info["urls"]["pc"];?>>ホットペッパーで見る</a>
-          <p>アクセス:<?php echo $info["access"]?></p>
+        <ul class="store-info list-group">
+          <small>予算:<?php echo $arrShop["budget"]?></small>
+          <a href=<?php echo ("./detail_view.php?id=$arrShop[id]");?>><?php echo $arrShop["name"];?></a>
+          <small><a href=<?php echo $arrShop["url"];?>>ホットペッパー</a></small>
+          <p>アクセス:<?php echo $arrShop["access"]?></p>
         </ul>
       </div>
     </div>
     <?php endforeach; ?>
-      <?php elseif(isset($res["results"]["error"])) :?>
-        <?php echo("<p>".$res["results"]["error"][0]["message"]."</p>");?>
+      <?php elseif(isset($arrShops)) :?>
+        <?php echo("<p>".$arrShops."</p>");?>
       <?php else :?>
         <?php echo ("ここに検索結果を表示します")?>
       <?php endif ; ?>
+    </div>
   </div>
 
+</body>
 
-
-  <?php
+<?php
     //位置情報の取得
       echo <<<EOM
       <script>
@@ -161,8 +160,6 @@
         });
       </script>
       EOM;
-
       ?>
-  </div>
-</body>
+
 </html>

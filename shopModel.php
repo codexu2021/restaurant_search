@@ -1,8 +1,8 @@
 <?php
-class HotPepperAPI
+class shopModel
 {
   //デフォルトの検索条件のリスト
-    private $search_list_default = 
+    private $arrShopList = 
     array(
       "key=" => "9b7974bbd99acf6a",
       "id=" => "",
@@ -53,7 +53,7 @@ class HotPepperAPI
     );
 
 
-    private $checkbox_list =
+    private $arrCheckList =
         array(
           "wifi=" => "WIFI",
           "wedding=" => "ウェディング二次会",
@@ -92,69 +92,96 @@ class HotPepperAPI
   public function get_checkbox_list()
   {
     //チェックボックス(2択)で検索する値のリストを取得する
-    return $this->checkbox_list;
+    return $this->arrCheckList;
   }
 
 
-  public function set_data(array $search_condition)
+  public function set_data(array $arrSearchCondition)
     {
-      $search_list = $this->search_list_default;
+      $arrSearchList = $this->arrShopList;
       //配列で値を入力する
-      foreach($search_condition as $key=>$value){
-        $search_list[$key] = $value;
+      foreach($arrSearchCondition as $key=>$value){
+        $arrSearchList[$key] = $value;
       }
-      return $search_list;
+      return $arrSearchList;
     } 
 
-  public function create_url($search_list)
+  public function create_url($arrSearchList)
     {
       //dataをリクエストの形にして渡す
-      $length = count($search_list);
+      $length = count($arrSearchList);
       $counter = 0;
-      $search_word = "";
-      foreach($search_list as $key => $value){
+      $strSearchWord = "";
+      foreach($arrSearchList as $key => $value){
         $counter += 1;
         if (empty($key)){echo("err: invaild_key"); break;}
         if (empty($value)){
           continue;
         }
-        $search_word .= $key;
-        $search_word .= $value;
+        $strSearchWord .= $key;
+        $strSearchWord .= $value;
         //ループの最後には処理を行わない
-        if ($counter !== $length){$search_word .= "&";}
+        if ($counter !== $length){$strSearchWord .= "&";}
       }
-      return $search_word;
+      return $strSearchWord;
     }
 
-  public function get_data($search_word)
+  public function get_json($strSearchWord)
   {
     //検索
-    $url = "http://webservice.recruit.co.jp/hotpepper/gourmet/v1/?{$search_word}";
+    $url = "http://webservice.recruit.co.jp/hotpepper/gourmet/v1/?{$strSearchWord}";
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     $res =  curl_exec($ch);
     curl_close($ch);
-    $api_data = json_decode($res,JSON_PRETTY_PRINT);
-    return $api_data;
+    $json = json_decode($res,JSON_PRETTY_PRINT);
+    return $json;
   } 
 
-  public function get_data_by_id($store_id)
-  {
-    //jsonでデータを受け取る
-    $key = $this->search_list_default["key="];
-    $url = "http://webservice.recruit.co.jp/hotpepper/gourmet/v1/?key={$key}&id=$store_id&format=json";
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    $res =  curl_exec($ch);
-    curl_close($ch);
-    $api_data = json_decode($res,JSON_PRETTY_PRINT);
-    return $api_data;
-  } 
+  public function get_shop_data($json){
+    foreach($json["results"]["shop"] as $shop){
+      $arrShopData[] = array(
+          'id' => $shop["id"],
+          'name' => $shop["name"],
+          'logo_image' => $shop["logo_image"],
+          'name_kana' => $shop["name_kana"],
+          'address' => $shop["address"],
+          'station_name' => $shop["station_name"],
+          'area_name' => $shop["large_area"]["name"],
+          'lat' => $shop["lat"],
+          'lng' => $shop["lng"],
+          'genre' => $shop["genre"]["name"],
+          'budget' => $shop["budget"]["average"],
+          'budget_memo' => $shop["budget_memo"],
+          'access' => $shop["access"],
+          'photo' => $shop["photo"]["pc"]["l"],
+          'open' => $shop["open"],
+          'close' => $shop["close"],
+          'url' => $shop["urls"]["pc"],
+      );
+    }
+    return $arrShopData;
+  }
 
+  public function get_checkbox_data($json){
+    $json = $json["results"]["shop"][0];
+    foreach($this->get_checkbox_list() as $key => $value){
+      $key = str_replace('=', "", $key);
+      if((isset($json[$key])))
+      {
+        $arrCheckboxList[] = $value . " " . $json[$key];
+      };
+
+    }
+
+    return $arrCheckboxList;
+  }
 }
 
+
+
+  
 
 
 
