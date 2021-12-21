@@ -90,7 +90,6 @@ https://hotpepper-website.herokuapp.com/index.php
 https://github.com/codexu2021/restaurant_search
 
 ## 開発環境
-### 開発環境
 - MAMP
 - VisualStudioCode
 
@@ -102,7 +101,7 @@ PHP 8.0
 chrome
 
 ## 開発期間
-7~9日程度
+8~10日程度
 
 ### 機能一覧
 - レストラン検索：ホットペッパーグルメサーチAPIを使用して、現在地周辺の飲食店を検索する。
