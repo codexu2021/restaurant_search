@@ -1,4 +1,5 @@
 <?php require('shopModel.php'); ?>
+<?php require('searchModel.php'); ?>
 <?php require_once('controller.php'); ?>
   <!-- ストアIDによるデータの取得 -->
   <?php if(isset($_GET['id'])) 

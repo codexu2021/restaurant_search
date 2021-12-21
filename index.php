@@ -1,7 +1,9 @@
 <!-- 2021 12/12 金岡雄一郎 作成 -->
 <?php require_once('shopModel.php'); ?>
+<?php require_once('searchModel.php'); ?>
 <?php require_once('controller.php'); ?>
   <?php // モデルの読み込み
+  $objSearch = new searchModel;
   $objShop = new shopModel;
   if(isset($_POST["arrSearchCondition"]))
   {
@@ -54,13 +56,11 @@
     </nav>
   </header>
 
-  <div class="main-contents my-3 pt-5">
-    <div class="search-area form-control form-group mx-5 container">
+  <div class="main-contents my-3 pt-5"> 
+    <div class="search-near-area form-control form-group mx-5 container">
+      <p>近くで検索</p>
       <!-- 送信フォーム 送信後に値を保持する処理と最初のアクセス時の値の有無の判定-->
       <form action="index.php" method="post">
-        <input class="form-control"type="search" name="arrSearchCondition[keyword=]" placeholder="キーワード検索" id = "keyword"
-        value="<?php if( !empty($arrSearchCondition["keyword="]) ){ echo $arrSearchCondition["keyword="]; } ?>">
-        <br>
         <input class="form-control" type="text" name="arrSearchCondition[lat=]" id="lat" placeholder="緯度:" 
         value="<?php if( !empty($arrSearchCondition["lat="]) ){ echo $arrSearchCondition["lat="]; } ?>" readonly>
         <input class="form-control" type="text" name="arrSearchCondition[lng=]" id="lng" placeholder="経度:"
@@ -68,12 +68,49 @@
         <div class="text-center my-3">
           <button class = "btn btn-outline-success"type="button"  onclick="getLocation()">自動場所検索</button>
         </div>
+      <?php if(!empty($arrSearchCondition['range='])) :?>
         <select class="form-select" name="arrSearchCondition[range=]" id="range" >
-          <option value ="1" <?php if(!empty($arrSearchCondition['range=']) && $arrSearchCondition['range=']==1) echo"selected"?>>300m以内</option>
-          <option value ="2" <?php if(!empty($arrSearchCondition['range=']) && $arrSearchCondition['range=']==2) echo"selected"?>>500m以内</option>
-          <option value ="3" <?php if(!empty($arrSearchCondition['range=']) && $arrSearchCondition['range=']==3) echo"selected"?>>1000m以内</option>
-          <option value ="4" <?php if(!empty($arrSearchCondition['range=']) && $arrSearchCondition['range=']==4) echo"selected"?>>2000m以内</option>
-          <option value ="5" <?php if(!empty($arrSearchCondition['range=']) && $arrSearchCondition['range=']==5) echo"selected"?>>3000m以内</option>
+          <option value ="1" <?php if($arrSearchCondition['range=']==1) echo"selected"?>>300m以内</option>
+          <option value ="2" <?php if($arrSearchCondition['range=']==2) echo"selected"?>>500m以内</option>
+          <option value ="3" <?php if($arrSearchCondition['range=']==3) echo"selected"?>>1000m以内</option>
+          <option value ="4" <?php if($arrSearchCondition['range=']==4) echo"selected"?>>2000m以内</option>
+          <option value ="5" <?php if($arrSearchCondition['range=']==5) echo"selected"?>>3000m以内</option>
+        </select>
+        <?php else :?>
+          <select class="form-select" name="arrSearchCondition[range=]" id="range" >
+          <option value ="1">300m以内</option>
+          <option value ="2">500m以内</option>
+          <option value ="3">1000m以内</option>
+          <option value ="4">2000m以内</option>
+          <option value ="5">3000m以内</option>
+        </select>
+        <?php endif ?>
+        <select class="form-select" name="arrSearchCondition[budget=]" id="budget">
+          <?php foreach($objSearch->get_master_code("budget") as $value ) :?>
+            <option value="<?php echo $value["code"];?>"><?php echo $value["name"];?></option>
+          <?php endforeach ?>
+        </select>
+        <div class="text-center">
+          <input class = "btn btn-outline-success center-text btn-lg" type="submit" value="検索">
+        </div>
+      </form>
+    </div>
+    <br>
+    <div class="search-all-area form-control form-group mx-5 container">
+      <p>遠くで検索</p>
+      <form action="index.php" method="post">
+        <input class="form-control"type="search" name="arrSearchCondition[keyword=]" placeholder="キーワード検索" id = "keyword"
+        value="<?php if( !empty($arrSearchCondition["keyword="]) ){ echo $arrSearchCondition["keyword="]; } ?>">
+        <br>
+        <select class="form-select" name="arrSearchCondition[budget=]" id="budget">
+          <?php foreach($objSearch->get_master_code("budget") as $value ) :?>
+            <option value="<?php echo $value["code"];?>"><?php echo $value["name"];?></option>
+          <?php endforeach ?>
+        </select>
+        <select class="form-select" name="arrSearchCondition[service_area=]" id="service_area">
+          <?php foreach($objSearch->get_master_code("service_area") as $value ) :?>
+            <option value="<?php echo $value["code"];?>"><?php echo $value["name"];?></option>
+          <?php endforeach ?>
         </select>
         <br>
         <div class="checkbox_list d-flex flex-column flex-wrap">
@@ -96,7 +133,7 @@
 
     <!-- 表示一覧 -->
     <div class="info-area container mx-5">
-    <?php if(isset($arrShops) && !is_string($arrShops) ) : ?>
+    <?php if(!empty($arrShops) && !is_string($arrShops) ) : ?>
       <p>検索結果:<?php echo $strShopTotal?> 件</p>
     <?php foreach($arrShops as $arrShop ) :?>
       <br>
@@ -114,7 +151,7 @@
       </div>
     </div>
     <?php endforeach; ?>
-      <?php elseif(isset($arrShops)) :?>
+      <?php elseif(!empty($arrShops)) :?>
         <?php echo("<p>".$arrShops."</p>");?>
       <?php else :?>
         <?php echo ("ここに検索結果を表示します")?>
